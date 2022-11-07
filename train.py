@@ -48,10 +48,11 @@ def main(character):
     english_probability = english_count / english_total
     french_probability = french_count / french_total
     if verbose:
-        print(f"English count: {english_count}")
-        print(f"French count: {french_count}")
-        print(f"English total: {english_total}")
-        print(f"French total: {french_total}")
+        # Print english count is pretty number
+        print(f"English count: {english_count:,}")
+        print(f"French count: {french_count:,}")
+        print(f"English total: {english_total:,}")
+        print(f"French total: {french_total:,}")
     print("English probability: " + str(english_probability))
     print("French probability: " + str(french_probability))
     if verbose:

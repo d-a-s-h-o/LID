@@ -45,6 +45,22 @@ def determine_language(word):
         print(f"The word is {round(french_probability / english_probability, 2)} times more likely to be a French word.")
     else:
         print("The word is equally likely to be in English or French.")
+    
+    # Check if the word is in the word lists.
+    with open('english_training.txt', 'r') as english_file:
+        english_words = english_file.read().splitlines()
+    with open('french_training.txt', 'r') as french_file:
+        french_words = french_file.read().splitlines()
+    if word in english_words:
+        english = True
+    if word in french_words:
+        french = True
+    if english and french:
+        print("The word is in both word lists.")
+    elif english:
+        print("The word is only in the English word list.")
+    elif french:
+        print("The word is only in the French word list.")
 
 # Run the program with the word given as a command line argument.
 if __name__ == "__main__":
