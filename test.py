@@ -1,68 +1,57 @@
 #!/usr/bin/env python3
 
 # This program is used to find the probability that a given word is in a given language, based on the probability that each character in the word is in the language.
-import sys
-import json
+import sys # The sys module is used to get the command line arguments.
+import json # The json module is used to import the probabilities file.
 
 # Import the probabilities file.
 def import_probabilities():
-    with open('probabilities.json', 'r') as probabilities_file:
-        probabilities = json.load(probabilities_file)
-    return probabilities
+    with open('english_probabilities.json', 'r') as english_probabilities: # Open the file.
+        english_probabilities = json.load(english_probabilities) # Load the file.
+    with open('french_probabilities.json', 'r') as french_probabilities:
+        french_probabilities = json.load(french_probabilities)
+    return english_probabilities, french_probabilities # Return the files.
 
+
+'''
+The default probability of a character not being in the language is 1/26. This is because there are 26 letters in the English alphabet, and 26 letters in the French alphabet (that we are considering). If a character is not in the probabilities file, it is assumed to be evenly distributed.
+
+The default probability of a word has to be 1, because the probability of a word is the product of the probabilities of each character in the word. If the probability of a word is 0, then the probability of any character in the word is 0, which is not true. We start with a probability of 1, and work our way down to the true probability.
+'''
 # Calculate the probability that a given word is in a given language.
 def calculate_word_probability(word, language):
-    probabilities = import_probabilities()
+    english_probabilities, french_probabilities = import_probabilities()
     word_probability = 1
-    for char in word:
-        if char in probabilities:
-            word_probability *= probabilities[char][language]
-        else:
-            # If the character is not in the probabilities file, assume it is equally likely to be in any language.
-            word_probability *= 0.5
+    if language == "english":
+        for character in word:
+            if character in english_probabilities:
+                word_probability *= english_probabilities[character]
+            else:
+                word_probability *= 1 / 26 # Evenly distributed.
+    elif language == "french":
+        for character in word:
+            if character in french_probabilities:
+                word_probability *= french_probabilities[character]
+            else:
+                word_probability *= 1 / 26 # Evenly distributed.
     return word_probability
 
 # Calculate the probability that a given word is in English or French.
 def main(word):
     english_probability = calculate_word_probability(word, "english")
     french_probability = calculate_word_probability(word, "french")
-    print("English probability: " + str(english_probability))
-    print("French probability: " + str(french_probability))
     # Return the language with the higher probability.
     if english_probability > french_probability:
-        return english_probability, french_probability, "english"
+        return "English"
     elif french_probability > english_probability:
-        return english_probability, french_probability, "french"
+        return "French"
     else:
-        return english_probability, french_probability, "equal"
-
-# Determine whether a given word is more likely to be in English or French, and by how much.
-def determine_language(word):
-    english_probability, french_probability, language = main(word)
-    if language == "english":
-        print(f"The word is {round(english_probability / french_probability, 2)} times more likely to be an English word.")
-    elif language == "french":
-        print(f"The word is {round(french_probability / english_probability, 2)} times more likely to be a French word.")
-    else:
-        print("The word is equally likely to be in English or French.")
-
-    # Check if the word is in the word lists.
-    with open('english_training.txt', 'r') as english_file:
-        english_words = english_file.read().splitlines()
-    with open('french_training.txt', 'r') as french_file:
-        french_words = french_file.read().splitlines()
-    if word in english_words:
-        english = True
-    if word in french_words:
-        french = True
-    if english and french:
-        print("The word is in both word lists.")
-    elif english:
-        print("The word is only in the English word list.")
-    elif french:
-        print("The word is only in the French word list.")
+        return "Equally likely to be in English or French." # This should never happen. If it does, there is most likely a bug in the code. The odds of a word being in both languages is probable, but being equally likely to be in both languages is very very unlikely. That would mean that either each character in the word is equally likely to be in both languages, which is not true for any character, or that the word is comprised of characters that are not in either language, which is a bug, or that the probability of one character is the same as the probability of a different character for the other language, and vice versa, which is incredibly unlikely.
 
 # Run the program with the word given as a command line argument.
 if __name__ == "__main__":
     word = sys.argv[1]
-    determine_language(word)
+    word = word.replace("é", "e").replace("è", "e").replace("ê", "e").replace("ë", "e").replace("à", "a").replace("â", "a").replace("ä", "a").replace("ç", "c").replace("î", "i").replace("ï", "i").replace("ô", "o").replace("ö", "o").replace("ù", "u").replace("û", "u").replace("ü", "u").replace("ÿ", "y").replace("œ", "oe").replace("æ", "ae").replace("ß", "ss").replace(" ", "")
+    word = "".join([char for char in word if char.isalpha()]).lower().strip()
+    print(word)
+    print(main(word))

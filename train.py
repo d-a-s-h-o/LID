@@ -9,79 +9,95 @@ import json
 # Set verbose to false as default.
 verbose = False
 
-# Import the two word lists (.txt files) that we will be using.
+language = None # Set the language to None.
+
+# Import the word lists as stdin.
 def import_word_lists():
-    english_words = []
-    french_words = []
-    with open('english_training.txt', 'r') as english_file:
-        english_words = english_file.read().splitlines()
-    with open('french_training.txt', 'r') as french_file:
-        french_words = french_file.read().splitlines()
-    return english_words, french_words
+    global language
+    english_words = [] # Create an empty list for the English words.
+    french_words = [] # Create an empty list for the French words.
+    for line in sys.stdin: # For each line in the input...
+        line = line.strip() # Remove the newline character.
+        line = line.replace("é", "e").replace("è", "e").replace("ê", "e").replace("ë", "e").replace("à", "a").replace("â", "a").replace("ä", "a").replace("ç", "c").replace("î", "i").replace("ï", "i").replace("ô", "o").replace("ö", "o").replace("ù", "u").replace("û", "u").replace("ü", "u").replace("ÿ", "y").replace("œ", "oe").replace("æ", "ae").replace("ß", "ss") # Replace accented characters with their unaccented counterparts.
+        line = "".join([char for char in line if char.isalpha()]) # Remove all non-alphabetic characters
+        if line == "ENGLISH": # If the line is "ENGLISH"...
+            language = "english" # Set the language to English.
+        elif line == "FRENCH": # If the line is "FRENCH"...
+            language = "french" # Set the language to French.
+        else: # If the line is not "ENGLISH" or "FRENCH"...
+            line = line.lower() # Set the line to lowercase.
+            if language == "english": # If the language is English...
+                english_words.append(line) # Add the line to the English word list.
+            elif language == "french": # If the language is French...
+                french_words.append(line) # Add the line to the French word list.
+            else: # If the language is not set...
+                # This should never happen.
+                print("Error: Language not set.") # Print an error message.
+                sys.exit(1) # Exit the program.
+    if language == "english": # If the language is English...
+        return english_words # Return the English word list.
+    elif language == "french": # If the language is French...
+        return french_words # Return the French word list.
+    else: # If the language is not set...
+        # This should never happen.
+        print("Error: Language not set.") # Print an error message.
+        sys.exit(1) # Exit the program.
 
-# Count the total number of characters in a given word list.
-def count_characters_in_word_list(word_list):
-    count = 0
-    for word in word_list:
-        for char in word:
-            count += 1
-    return count
 
-# Count how often a given character appears in a given word list.
-def count_character_in_word_list(character, word_list):
-    count = 0
-    for word in word_list:
-        for char in word:
-            if char == character:
-                count += 1
-    return count
+def count_characters_in_word_list(word_list): # Count the total number of characters in a word list.
+    count = 0 # Set the count to 0.
+    for word in word_list: # For each word in the word list...
+        for char in word: # For each character in the word...
+            count += 1 # Add one to the count.
+    return count # Return the count.
 
-# Calculate the probability that a given character appears in a random word for a given language.
-def main(character):
-    global verbose
-    english_words, french_words = import_word_lists()
-    character = character.lower()
-    english_count = count_character_in_word_list(character, english_words)
-    french_count = count_character_in_word_list(character, french_words)
-    english_total = count_characters_in_word_list(english_words)
-    french_total = count_characters_in_word_list(french_words)
-    english_probability = english_count / english_total
-    french_probability = french_count / french_total
-    if verbose:
+def count_character_in_word_list(character, word_list): # Count the number of times a character appears in a word list.
+    count = 0 # Set the count to 0.
+    for word in word_list: # For each word in the word list...
+        for char in word: # For each character in the word...
+            if char == character: # If the character is the character we are looking for...
+                count += 1 # Add one to the count.
+    return count # Return the count.
+
+def print_probabilities(): # Print the probabilities for each character.
+    probabilities = {} # Create an empty dictionary for the probabilities.
+    words = import_word_lists() # Import the word lists.
+    for character in "abcdefghijklmnopqrstuvwxyz": # For each character in the alphabet...
+        if verbose: # If verbose is true...
+            print(character) # Print the character.
+        probabilities[character] = main(character, True, words) # Add the probability of the character to the dictionary.
+    if language == "english": # If the language is English...
+        with open('english_probabilities.json', 'w') as outfile: # Open the English probabilities file...
+            json.dump(probabilities, outfile) # Write the probabilities to the file.
+    elif language == "french": # If the language is French...
+        with open('french_probabilities.json', 'w') as outfile: # Open the French probabilities file...
+            json.dump(probabilities, outfile) # Write the probabilities to the file.
+    else: # If the language is not set...
+        # This should never happen.
+        print("Error: Language not set.") # Print an error message.
+        sys.exit(1) # Exit the program.
+
+def main(character, internal=False, words=None): # Find the probability that a character appears in a random word.
+    global verbose # Import the verbose variable.
+    global language # Import the language variable.
+    if internal: # If this is an internal call...
+        word_list = words # Set the word list to the word list passed to the function.
+    else: # If this is not an internal call...
+        word_list = import_word_lists() # Import the word lists.
+    character = character.lower() # Set the character to lowercase.
+    count = count_character_in_word_list(character, word_list) # Count the number of times the character appears in the word list.
+    total = count_characters_in_word_list(word_list) # Count the total number of characters in the word list.
+    probability = count / total # Calculate the probability.
+    if verbose: # If verbose is true...
         # Print english count is pretty number
-        print(f"English count: {english_count:,}")
-        print(f"French count: {french_count:,}")
-        print(f"English total: {english_total:,}")
-        print(f"French total: {french_total:,}")
-    print("English probability: " + str(english_probability))
-    print("French probability: " + str(french_probability))
-    if verbose:
-        print(f"E to F ratio: {english_probability / french_probability}")
+        print(f"Language: {language}") # Print the language.
+        print(f"Count: {count:,}") # Print the count.
+        print(f"Total: {total:,}") # Print the total.
+        print("Probability: " + str(probability)) # Print the probability.
+    if internal: # If this is an internal call...
+        return probability # Return the probability.
+    else: # If this is not an internal call...
+        print("Probability: " + str(probability)) # Print the probability.
 
-# Print json of the probabilities for each character (a-z) to file.
-def print_probabilities():
-    probabilities = {}
-    for character in "abcdefghijklmnopqrstuvwxyz":
-        english_words, french_words = import_word_lists()
-        english_count = count_character_in_word_list(character, english_words)
-        french_count = count_character_in_word_list(character, french_words)
-        english_total = count_characters_in_word_list(english_words)
-        french_total = count_characters_in_word_list(french_words)
-        english_probability = english_count / english_total
-        french_probability = french_count / french_total
-        probabilities[character] = {
-            "english": english_probability, "french": french_probability}
-    with open('probabilities.json', 'w') as probabilities_file:
-        probabilities_file.write(json.dumps(probabilities))
-
-# Run the program.
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if len(sys.argv) > 2:
-            if sys.argv[2] == "-v":
-                verbose = True
-            else:
-                verbose = False
-        main(sys.argv[1])
-    else:
-        print_probabilities()
+    print_probabilities() # Print the probabilities for each character.
