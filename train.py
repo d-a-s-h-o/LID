@@ -7,8 +7,6 @@ import sys
 import json
 
 # Set verbose to false as default.
-verbose = False
-
 language = None # Set the language to None.
 
 # Import the word lists as stdin.
@@ -63,9 +61,7 @@ def print_probabilities(): # Print the probabilities for each character.
     probabilities = {} # Create an empty dictionary for the probabilities.
     words = import_word_lists() # Import the word lists.
     for character in "abcdefghijklmnopqrstuvwxyz": # For each character in the alphabet...
-        if verbose: # If verbose is true...
-            print(character) # Print the character.
-        probabilities[character] = main(character, True, words) # Add the probability of the character to the dictionary.
+        probabilities[character] = main(character, words) # Add the probability of the character to the dictionary.
     if language == "english": # If the language is English...
         with open('english_probabilities.json', 'w') as outfile: # Open the English probabilities file...
             json.dump(probabilities, outfile) # Write the probabilities to the file.
@@ -77,27 +73,15 @@ def print_probabilities(): # Print the probabilities for each character.
         print("Error: Language not set.") # Print an error message.
         sys.exit(1) # Exit the program.
 
-def main(character, internal=False, words=None): # Find the probability that a character appears in a random word.
+def main(character, words=None): # Find the probability that a character appears in a random word.
     global verbose # Import the verbose variable.
     global language # Import the language variable.
-    if internal: # If this is an internal call...
-        word_list = words # Set the word list to the word list passed to the function.
-    else: # If this is not an internal call...
-        word_list = import_word_lists() # Import the word lists.
+    word_list = words # Set the word list to the word list passed to the function.
     character = character.lower() # Set the character to lowercase.
     count = count_character_in_word_list(character, word_list) # Count the number of times the character appears in the word list.
     total = count_characters_in_word_list(word_list) # Count the total number of characters in the word list.
     probability = count / total # Calculate the probability.
-    if verbose: # If verbose is true...
-        # Print english count is pretty number
-        print(f"Language: {language}") # Print the language.
-        print(f"Count: {count:,}") # Print the count.
-        print(f"Total: {total:,}") # Print the total.
-        print("Probability: " + str(probability)) # Print the probability.
-    if internal: # If this is an internal call...
-        return probability # Return the probability.
-    else: # If this is not an internal call...
-        print("Probability: " + str(probability)) # Print the probability.
+    return probability # Return the probability.
 
 if __name__ == "__main__":
     print_probabilities() # Print the probabilities for each character.

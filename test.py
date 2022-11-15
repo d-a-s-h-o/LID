@@ -53,5 +53,4 @@ if __name__ == "__main__":
     word = sys.argv[1]
     word = word.replace("é", "e").replace("è", "e").replace("ê", "e").replace("ë", "e").replace("à", "a").replace("â", "a").replace("ä", "a").replace("ç", "c").replace("î", "i").replace("ï", "i").replace("ô", "o").replace("ö", "o").replace("ù", "u").replace("û", "u").replace("ü", "u").replace("ÿ", "y").replace("œ", "oe").replace("æ", "ae").replace("ß", "ss").replace(" ", "")
     word = "".join([char for char in word if char.isalpha()]).lower().strip()
-    print(word)
     print(main(word))
