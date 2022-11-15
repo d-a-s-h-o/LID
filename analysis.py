@@ -13,7 +13,6 @@ with open("english_probabilities.json", "r") as english_probabilities: # Open th
 with open("french_probabilities.json", "r") as french_probabilities: # Open the file.
     french_probabilities = json.load(french_probabilities) # Load the data.
 
-# Create a list of the characters a-z.
 characters = 'abcdefghijklmnopqrstuvwxyz' # Create a list of the characters a-z.
 
 # Create a list of the probabilities of each character in English.

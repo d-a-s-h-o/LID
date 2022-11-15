@@ -2,6 +2,21 @@
 
 # This program is used to find the probability that a given character appears in a random word for a given language.
 
+'''
+Usage: python3 train.py < word_lists.txt
+Note: The word lists must be in the following format:
+  <language>_<training><optional descriptors>.txt
+    ENGLISH
+    word
+    word
+    ...
+  <language>_<training><optional descriptors>.txt
+    FRENCH
+    word
+    word
+    ...
+'''
+
 # Import the two word lists (.txt files) that we will be using.
 import sys
 import json
